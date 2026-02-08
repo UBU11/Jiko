@@ -15,26 +15,24 @@ export default function Page() {
   const [code, setCode] = React.useState('')
   const [showEmailCode, setShowEmailCode] = React.useState(false)
 
-  // Handle the submission of the sign-in form
+  
   const onSignInPress = React.useCallback(async () => {
     if (!isLoaded) return
 
-    // Start the sign-in process using the email and password provided
+  
     try {
       const signInAttempt = await signIn.create({
         identifier: emailAddress,
         password,
       })
 
-      // If sign-in process is complete, set the created session as active
-      // and redirect the user
+  
       if (signInAttempt.status === 'complete') {
         await setActive({
           session: signInAttempt.createdSessionId,
           navigate: async ({ session }) => {
             if (session?.currentTask) {
-              // Check for tasks and navigate to custom UI to help users resolve them
-              // See https://clerk.com/docs/guides/development/custom-flows/authentication/session-tasks
+
               console.log(session?.currentTask)
               return
             }
@@ -43,10 +41,7 @@ export default function Page() {
           },
         })
       } else if (signInAttempt.status === 'needs_second_factor') {
-        // Check if email_code is a valid second factor
-        // This is required when Client Trust is enabled and the user
-        // is signing in from a new device.
-        // See https://clerk.com/docs/guides/secure/client-trust
+     
         const emailCodeFactor = signInAttempt.supportedSecondFactors?.find(
           (factor): factor is EmailCodeFactor => factor.strategy === 'email_code',
         )
@@ -59,21 +54,19 @@ export default function Page() {
           setShowEmailCode(true)
         }
       } else {
-        // If the status is not complete, check why. User may need to
-        // complete further steps.
+      
         console.error('Sign-in incomplete:', JSON.stringify(signInAttempt, null, 2))
         Alert.alert('Sign-in Incomplete', 'Please complete all required steps.')
       }
     } catch (err: any) {
-      // See https://clerk.com/docs/guides/development/custom-flows/error-handling
-      // for more info on error handling
+     
       console.error('Sign-in error:', JSON.stringify(err, null, 2))
       const errorMessage = err?.errors?.[0]?.longMessage || err?.errors?.[0]?.message || 'Sign-in failed. Please check your credentials.'
       Alert.alert('Sign-in Error', errorMessage)
     }
   }, [isLoaded, signIn, setActive, router, emailAddress, password])
 
-  // Handle the submission of the email verification code
+ 
   const onVerifyPress = React.useCallback(async () => {
     if (!isLoaded) return
 
@@ -88,8 +81,7 @@ export default function Page() {
           session: signInAttempt.createdSessionId,
           navigate: async ({ session }) => {
             if (session?.currentTask) {
-              // Check for tasks and navigate to custom UI to help users resolve them
-              // See https://clerk.com/docs/guides/development/custom-flows/authentication/session-tasks
+
               console.log(session?.currentTask)
               return
             }

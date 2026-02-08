@@ -15,11 +15,11 @@ export default function Page() {
   const [pendingVerification, setPendingVerification] = React.useState(false)
   const [code, setCode] = React.useState('')
 
-  // Handle submission of sign-up form
+  
   const onSignUpPress = async () => {
     if (!isLoaded) return
 
-    // Start sign-up process using email and password provided
+   
     try {
       await signUp.create({
         emailAddress,
@@ -27,40 +27,35 @@ export default function Page() {
         password,
       })
 
-      // Send user an email with verification code
       await signUp.prepareEmailAddressVerification({ strategy: 'email_code' })
 
-      // Set 'pendingVerification' to true to display second form
-      // and capture code
+     
       setPendingVerification(true)
     } catch (err: any) {
-      // See https://clerk.com/docs/guides/development/custom-flows/error-handling
-      // for more info on error handling
+  
       console.error('Sign-up error:', JSON.stringify(err, null, 2))
       const errorMessage = err?.errors?.[0]?.longMessage || err?.errors?.[0]?.message || 'Sign-up failed. Please try again.'
       Alert.alert('Sign-up Error', errorMessage)
     }
   }
 
-  // Handle submission of verification form
+  
   const onVerifyPress = async () => {
     if (!isLoaded) return
 
     try {
-      // Use the code the user provided to attempt verification
+   
       const signUpAttempt = await signUp.attemptEmailAddressVerification({
         code,
       })
 
-      // If verification was completed, set the session to active
-      // and redirect the user
+      
       if (signUpAttempt.status === 'complete') {
         await setActive({
           session: signUpAttempt.createdSessionId,
           navigate: async ({ session }) => {
             if (session?.currentTask) {
-              // Check for tasks and navigate to custom UI to help users resolve them
-              // See https://clerk.com/docs/guides/development/custom-flows/authentication/session-tasks
+           
               console.log(session?.currentTask)
               return
             }
@@ -69,14 +64,12 @@ export default function Page() {
           },
         })
       } else {
-        // If the status is not complete, check why. User may need to
-        // complete further steps.
+
         console.error('Verification incomplete:', JSON.stringify(signUpAttempt, null, 2))
         Alert.alert('Verification Incomplete', 'Please complete all required steps.')
       }
     } catch (err: any) {
-      // See https://clerk.com/docs/guides/development/custom-flows/error-handling
-      // for more info on error handling
+     
       console.error('Verification error:', JSON.stringify(err, null, 2))
       const errorMessage = err?.errors?.[0]?.longMessage || err?.errors?.[0]?.message || 'Verification failed.'
       Alert.alert('Verification Error', errorMessage)
